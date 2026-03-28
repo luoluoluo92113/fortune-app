@@ -5,8 +5,6 @@ export default async function handler(req, res) {
 
   const { question } = req.body;
 
-  const prompt = `你是一位精通易学的大师，请用通俗易懂的方式解答这个问题：${question}`;
-
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -16,16 +14,21 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
+        messages: [
+          {
+            role: "user",
+            content: `你是一位算命大师，请分析这个问题：${question}`,
+          },
+        ],
       }),
     });
 
     const data = await response.json();
 
     res.status(200).json({
-      result: data.choices?.[0]?.message?.content || "没有返回结果",
+      result: data.choices?.[0]?.message?.content || "没有结果",
     });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 }
