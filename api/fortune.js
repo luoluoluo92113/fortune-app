@@ -7,11 +7,11 @@ export default async function handler(req, res) {
       headers: {
         "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://your-site.vercel.app", // 随便填你的域名
+        "HTTP-Referer": "https://your-site.vercel.app",
         "X-Title": "AI Fortune App"
       },
       body: JSON.stringify({
-        model: "mistralai/mistral-7b-instruct", // ✅ 免费模型
+        model: "openchat/openchat-3.5", // ✅ 已修复
         messages: [
           {
             role: "system",
@@ -21,7 +21,8 @@ export default async function handler(req, res) {
             role: "user",
             content: question
           }
-        ]
+        ],
+        temperature: 0.8
       })
     });
 
