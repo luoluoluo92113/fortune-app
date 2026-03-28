@@ -2,170 +2,142 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>AI算卦</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI算卦 · 终极版</title>
 <style>
-body {
-  margin: 0;
-  height: 100vh;
-  background: radial-gradient(circle at top, #2c2c54, #1e1e2f);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: "PingFang SC", sans-serif;
-  color: #fff;
-  overflow: hidden;
+body{
+  margin:0;
+  height:100vh;
+  background: radial-gradient(circle at top,#1a1a2e,#0f0f1a);
+  color:#fff;
+  font-family:sans-serif;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
 }
 
-/* 星空粒子 */
-body::before {
-  content: "";
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background: url("https://www.transparenttextures.com/patterns/stardust.png");
-  opacity: 0.2;
+/* 星空 */
+.star{
+  position:absolute;
+  width:2px;
+  height:2px;
+  background:white;
+  opacity:0.8;
+  animation:twinkle 2s infinite alternate;
+}
+@keyframes twinkle{
+  from{opacity:0.2}
+  to{opacity:1}
 }
 
-/* 卡片 */
-.card {
-  width: 360px;
-  padding: 40px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(15px);
-  text-align: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  animation: fadeIn 1s ease;
+.card{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(20px);
+  padding:40px;
+  border-radius:20px;
+  text-align:center;
+  width:320px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
 }
 
-@keyframes fadeIn {
-  from {opacity:0; transform: translateY(20px);}
-  to {opacity:1; transform: translateY(0);}
+input{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  margin:20px 0;
 }
 
-h1 {
-  margin-bottom: 20px;
+button{
+  padding:12px 24px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(135deg,#6c5ce7,#a29bfe);
+  color:white;
+  font-size:16px;
+  cursor:pointer;
 }
 
-input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  outline: none;
-  font-size: 14px;
+button:disabled{
+  opacity:0.5;
 }
 
-button {
-  margin-top: 20px;
-  padding: 12px 30px;
-  border: none;
-  border-radius: 10px;
-  background: linear-gradient(45deg, #6a5af9, #8f7cff);
-  color: #fff;
-  font-size: 16px;
-  cursor: pointer;
-  transition: 0.3s;
+#result{
+  margin-top:20px;
+  min-height:40px;
+  opacity:0.9;
 }
 
-button:hover {
-  transform: scale(1.05);
-}
-
-/* 结果区域 */
-#result {
-  margin-top: 20px;
-  min-height: 40px;
-  font-size: 16px;
-  opacity: 0.9;
-}
-
-/* 抽签动画 */
-.loading {
-  animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  0% {opacity: 0.3;}
-  50% {opacity: 1;}
-  100% {opacity: 0.3;}
-}
 </style>
 </head>
-
 <body>
 
 <div class="card">
-  <h1>🔮 AI算卦</h1>
-
-  <input id="q" placeholder="请输入你的问题..." />
-
+  <h2>🔮 AI算卦</h2>
+  <input id="q" placeholder="输入你的问题...">
   <button onclick="calc()">开始占卜</button>
-
   <div id="result"></div>
 </div>
 
 <script>
-let count = localStorage.getItem("count") || 0;
-
-// 打字机效果
-function typeText(el, text) {
-  el.innerText = "";
-  let i = 0;
-  let timer = setInterval(() => {
-    el.innerText += text[i];
-    i++;
-    if (i >= text.length) clearInterval(timer);
-  }, 40);
+// 生成星空
+for(let i=0;i<80;i++){
+  const s=document.createElement('div');
+  s.className='star';
+  s.style.left=Math.random()*100+'vw';
+  s.style.top=Math.random()*100+'vh';
+  document.body.appendChild(s);
 }
 
-async function calc() {
-  const input = document.getElementById("q").value;
-  const resultDiv = document.getElementById("result");
+const localFortunes=[
+"大吉：时来运转✨",
+"中吉：稳中求胜🌙",
+"小吉：努力即有回报🍀",
+"凶：今日宜静不宜动⚠️",
+"玄机：命由心生，运由己造"
+];
 
-  if (!input) {
-    resultDiv.innerText = "🙏 请先输入问题";
+async function calc(){
+  const input=document.getElementById('q');
+  const result=document.getElementById('result');
+  const btn=document.querySelector('button');
+
+  if(!input.value){
+    result.innerText="请输入问题";
     return;
   }
 
-  // 限制次数（商业用）
-  if (count >= 3) {
-    resultDiv.innerText = "🔒 今日次数已用完，解锁查看更多天机";
-    return;
-  }
+  btn.disabled=true;
+  result.innerText="🔮 天机推演中...";
 
-  count++;
-  localStorage.setItem("count", count);
-
-  // 抽签动画
-  resultDiv.innerHTML = "🎴 天机推演中...";
-  resultDiv.classList.add("loading");
-
-  try {
-    const res = await fetch("/api/fortune", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        question: input
-      })
+  try{
+    const res=await fetch('/api/fortune',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question:input.value})
     });
 
-    const data = await res.json();
+    const data=await res.json();
+    typeText(result,data.result);
 
-    resultDiv.classList.remove("loading");
-
-    // 运势等级随机
-    const luck = ["大吉", "中吉", "小吉", "凶"];
-    const randomLuck = luck[Math.floor(Math.random() * luck.length)];
-
-    typeText(resultDiv, `✨ 运势：${randomLuck}\n\n${data.result}`);
-
-  } catch (err) {
-    resultDiv.innerText = "⚠️ 天机紊乱，请稍后再试";
+  }catch(e){
+    // fallback
+    const r=localFortunes[Math.floor(Math.random()*localFortunes.length)];
+    typeText(result,r);
   }
+
+  btn.disabled=false;
+}
+
+function typeText(el,text){
+  el.innerText="";
+  let i=0;
+  const timer=setInterval(()=>{
+    el.innerText+=text[i];
+    i++;
+    if(i>=text.length) clearInterval(timer);
+  },40);
 }
 </script>
 
