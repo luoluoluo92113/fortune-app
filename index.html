@@ -43,10 +43,6 @@ button {
   cursor: pointer;
 }
 
-button:hover {
-  background: #5a4bd1;
-}
-
 #result {
   margin-top: 20px;
   min-height: 40px;
@@ -89,10 +85,10 @@ async function calc() {
 
     const data = await res.json();
 
-    resultDiv.innerText = data.result || "暂无结果";
+    resultDiv.innerText = data.result || "没有返回结果";
 
   } catch (err) {
-    resultDiv.innerText = "网络错误 😢";
+    resultDiv.innerText = "请求失败 😢";
   }
 }
 </script>
