@@ -1,29 +1,26 @@
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
   try {
     const { question } = req.body;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
-            content: "你是一位精通易经、玄学、算命的大师，说话神秘一点。"
+            content: "你是一个神秘的东方算命大师，说话要玄一点，简短一点。"
           },
           {
             role: "user",
             content: question
           }
-        ]
+        ],
+        temperature: 0.8
       })
     });
 
@@ -34,6 +31,8 @@ export default async function handler(req, res) {
     });
 
   } catch (err) {
-    res.status(500).json({ error: "服务器错误" });
+    res.status(200).json({
+      result: "天机被屏蔽了，请稍后再试"
+    });
   }
 }
