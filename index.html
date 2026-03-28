@@ -8,21 +8,44 @@
 body {
   margin: 0;
   height: 100vh;
+  background: radial-gradient(circle at top, #2c2c54, #1e1e2f);
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #1e1e2f, #2d2d44);
-  font-family: sans-serif;
-  color: white;
+  font-family: "PingFang SC", sans-serif;
+  color: #fff;
+  overflow: hidden;
 }
 
+/* 星空粒子 */
+body::before {
+  content: "";
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: url("https://www.transparenttextures.com/patterns/stardust.png");
+  opacity: 0.2;
+}
+
+/* 卡片 */
 .card {
-  background: #3a3a55;
+  width: 360px;
   padding: 40px;
   border-radius: 20px;
-  width: 400px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(15px);
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  animation: fadeIn 1s ease;
+}
+
+@keyframes fadeIn {
+  from {opacity:0; transform: translateY(20px);}
+  to {opacity:1; transform: translateY(0);}
+}
+
+h1 {
+  margin-bottom: 20px;
 }
 
 input {
@@ -30,22 +53,43 @@ input {
   padding: 12px;
   border-radius: 10px;
   border: none;
-  margin: 20px 0;
+  outline: none;
+  font-size: 14px;
 }
 
 button {
-  background: #6c5ce7;
-  border: none;
+  margin-top: 20px;
   padding: 12px 30px;
+  border: none;
   border-radius: 10px;
-  color: white;
+  background: linear-gradient(45deg, #6a5af9, #8f7cff);
+  color: #fff;
   font-size: 16px;
   cursor: pointer;
+  transition: 0.3s;
 }
 
+button:hover {
+  transform: scale(1.05);
+}
+
+/* 结果区域 */
 #result {
   margin-top: 20px;
   min-height: 40px;
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+/* 抽签动画 */
+.loading {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0% {opacity: 0.3;}
+  50% {opacity: 1;}
+  100% {opacity: 0.3;}
 }
 </style>
 </head>
@@ -55,7 +99,7 @@ button {
 <div class="card">
   <h1>🔮 AI算卦</h1>
 
-  <input id="q" placeholder="输入你的问题..." />
+  <input id="q" placeholder="请输入你的问题..." />
 
   <button onclick="calc()">开始占卜</button>
 
@@ -63,16 +107,40 @@ button {
 </div>
 
 <script>
+let count = localStorage.getItem("count") || 0;
+
+// 打字机效果
+function typeText(el, text) {
+  el.innerText = "";
+  let i = 0;
+  let timer = setInterval(() => {
+    el.innerText += text[i];
+    i++;
+    if (i >= text.length) clearInterval(timer);
+  }, 40);
+}
+
 async function calc() {
   const input = document.getElementById("q").value;
   const resultDiv = document.getElementById("result");
 
   if (!input) {
-    resultDiv.innerText = "请输入问题 🙏";
+    resultDiv.innerText = "🙏 请先输入问题";
     return;
   }
 
-  resultDiv.innerText = "🔮 正在推算中...";
+  // 限制次数（商业用）
+  if (count >= 3) {
+    resultDiv.innerText = "🔒 今日次数已用完，解锁查看更多天机";
+    return;
+  }
+
+  count++;
+  localStorage.setItem("count", count);
+
+  // 抽签动画
+  resultDiv.innerHTML = "🎴 天机推演中...";
+  resultDiv.classList.add("loading");
 
   try {
     const res = await fetch("/api/fortune", {
@@ -80,15 +148,23 @@ async function calc() {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ question: input })
+      body: JSON.stringify({
+        question: input
+      })
     });
 
     const data = await res.json();
 
-    resultDiv.innerText = data.result || "没有返回结果";
+    resultDiv.classList.remove("loading");
+
+    // 运势等级随机
+    const luck = ["大吉", "中吉", "小吉", "凶"];
+    const randomLuck = luck[Math.floor(Math.random() * luck.length)];
+
+    typeText(resultDiv, `✨ 运势：${randomLuck}\n\n${data.result}`);
 
   } catch (err) {
-    resultDiv.innerText = "请求失败 😢";
+    resultDiv.innerText = "⚠️ 天机紊乱，请稍后再试";
   }
 }
 </script>
