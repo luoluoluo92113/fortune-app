@@ -1,18 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>AI算卦</title>
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #1e1e2f, #2d2d44);
+  font-family: sans-serif;
+  color: white;
+}
+
+.card {
+  background: #3a3a55;
+  padding: 40px;
+  border-radius: 20px;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  margin: 20px 0;
+}
+
+button {
+  background: #6c5ce7;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 10px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #5a4bd1;
+}
+
+#result {
+  margin-top: 20px;
+  min-height: 40px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>🔮 AI算卦</h1>
+
+  <input id="q" placeholder="输入你的问题..." />
+
+  <button onclick="calc()">开始占卜</button>
+
+  <div id="result"></div>
+</div>
+
+<script>
 async function calc() {
   const input = document.getElementById("q").value;
   const resultDiv = document.getElementById("result");
-  const btn = document.querySelector("button");
 
   if (!input) {
     resultDiv.innerText = "请输入问题 🙏";
     return;
   }
 
-  // 👉 防止重复点击
-  btn.disabled = true;
-  btn.innerText = "推演中...";
-
-  resultDiv.innerHTML = "<span class='loading'>🔮 正在推演天机...</span>";
+  resultDiv.innerText = "🔮 正在推算中...";
 
   try {
     const res = await fetch("/api/fortune", {
@@ -25,13 +89,13 @@ async function calc() {
 
     const data = await res.json();
 
-    typeText(resultDiv, data.result || "卦象异常 🤯");
+    resultDiv.innerText = data.result || "暂无结果";
 
   } catch (err) {
-    resultDiv.innerText = "网络波动，请稍后再试 🌐";
+    resultDiv.innerText = "网络错误 😢";
   }
-
-  // 👉 恢复按钮
-  btn.disabled = false;
-  btn.innerText = "开始占卜";
 }
+</script>
+
+</body>
+</html>
