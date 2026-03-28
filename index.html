@@ -1,98 +1,17 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-  <meta charset="UTF-8">
-  <title>AI算卦</title>
-
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #1e1e2f, #3a3a5f);
-      color: #fff;
-    }
-
-    .card {
-      background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(10px);
-      padding: 40px;
-      border-radius: 20px;
-      text-align: center;
-      width: 350px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-
-    h1 {
-      margin-bottom: 20px;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
-      margin-bottom: 20px;
-      font-size: 14px;
-    }
-
-    button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 10px;
-      background: #6c5ce7;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    button:hover {
-      background: #4834d4;
-      transform: scale(1.05);
-    }
-
-    #result {
-      margin-top: 20px;
-      min-height: 60px;
-      line-height: 1.6;
-      color: #f1f1f1;
-    }
-
-    .loading {
-      color: #aaa;
-      font-style: italic;
-    }
-  </style>
-</head>
-
-<body>
-
-<div class="card">
-  <h1>🔮 AI算卦</h1>
-
-  <input id="q" placeholder="比如：我这周会顺利吗？" />
-
-  <br>
-  <button onclick="calc()">开始占卜</button>
-
-  <div id="result"></div>
-</div>
-
-<script>
 async function calc() {
   const input = document.getElementById("q").value;
   const resultDiv = document.getElementById("result");
+  const btn = document.querySelector("button");
 
   if (!input) {
     resultDiv.innerText = "请输入问题 🙏";
     return;
   }
 
-  // 显示 loading
+  // 👉 防止重复点击
+  btn.disabled = true;
+  btn.innerText = "推演中...";
+
   resultDiv.innerHTML = "<span class='loading'>🔮 正在推演天机...</span>";
 
   try {
@@ -101,33 +20,18 @@ async function calc() {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        question: input
-      })
+      body: JSON.stringify({ question: input })
     });
 
     const data = await res.json();
 
-    // 打字效果
-    typeText(resultDiv, data.result);
+    typeText(resultDiv, data.result || "卦象异常 🤯");
 
   } catch (err) {
-    resultDiv.innerText = "出错了 😢：" + err.message;
+    resultDiv.innerText = "网络波动，请稍后再试 🌐";
   }
+
+  // 👉 恢复按钮
+  btn.disabled = false;
+  btn.innerText = "开始占卜";
 }
-
-// 打字机效果
-function typeText(element, text) {
-  element.innerText = "";
-  let i = 0;
-
-  const timer = setInterval(() => {
-    element.innerText += text[i];
-    i++;
-    if (i >= text.length) clearInterval(timer);
-  }, 30);
-}
-</script>
-
-</body>
-</html>
